@@ -1,0 +1,14 @@
+{
+  "tasks": {
+    "bot": "deno run --env -A ./src/main.ts"
+    "populate": "bun run --env -A ./src/scripts/populate.ts",
+    "delete": "bun run --env -A ./src/scripts/delete.ts"
+  },
+  "imports": {
+    "@std/assert": "jsr:@std/assert@1",
+    "@std/path": "jsr:@std/path@^1.1.5",
+    "cheerio": "npm:cheerio@^1.2.0",
+    "discord.js": "npm:discord.js@^14.26.4",
+    "youtubei.js": "npm:youtubei.js@^17.1.0"
+  }
+}
