@@ -8,6 +8,7 @@ import {
   MessageFlags,
 } from "discord.js";
 import { getCommandsFiles } from "./utils/files.ts";
+import { UnImportantError } from "./errors/errors.ts";
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
@@ -39,7 +40,7 @@ client.on(
     try {
       await command.execute(interaction);
     } catch (error) {
-      console.error(error);
+      if (!(error instanceof UnImportantError)) console.error(error);
       if (interaction.replied || interaction.deferred) {
         await interaction.followUp({
           content: `❌ ${error}`,

@@ -9,14 +9,14 @@ import {
   SlashCommandBuilder,
 } from "discord.js";
 import * as music from "../../playlist/playlist.ts";
-import { getStore, userAndBotInSameVC } from "../../utils/memory.ts";
+import { getStore, userAndBotInSameVC, Store } from "../../utils/store.ts";
 import {
   AudioPlayerStatus,
   createAudioResource,
   StreamType,
 } from "@discordjs/voice";
 import { Readable } from "node:stream";
-import { Store } from "../../store.ts";
+import { UnImportantError, UserNotInSameVCError } from "../../errors/errors.ts";
 
 function parseUrlsFromInput(value: string): string[] {
   return value
@@ -174,16 +174,11 @@ export default {
         ),
     ),
   async execute(interaction: ChatInputCommandInteraction) {
-    if (!(await userAndBotInSameVC(interaction))) {
-      await interaction.reply({
-        content: "Necesitas estar en el mismo VC que yo",
-        flags: MessageFlags.Ephemeral,
-      });
-      return;
-    }
-
     const store = getStore(interaction);
     const subcommand = interaction.options.getSubcommand();
+
+    if (!(await userAndBotInSameVC(interaction)) && subcommand !== "list")
+      throw new UserNotInSameVCError();
 
     if (!store.listenerActive) {
       setupPlayerListener(store);
@@ -202,7 +197,7 @@ export default {
           store.player.unpause();
           await interaction.followUp("Reproduciondo audio.");
         } else if (store.player.state.status === AudioPlayerStatus.Playing) {
-          await interaction.followUp("El audio ya se esta reproduciendo.");
+          throw new UnImportantError("El audio ya se está reproduciendo.");
         } else {
           playNextSong(store);
           await interaction.followUp("Reproduciondo audio.");
@@ -216,7 +211,7 @@ export default {
         }
 
         if (store.player.state.status === AudioPlayerStatus.Paused) {
-          await interaction.reply("El audio ya está pausado.");
+          throw new UnImportantError("El audio ya está pausado.");
         } else {
           store.player.pause();
           await interaction.reply("Audio pausado.");
@@ -225,9 +220,8 @@ export default {
       }
 
       case "skip":
-        if (store.list.songs.length <= 1) {
+        if (store.list.songs.length <= 1)
           throw "No hay suficientes canciones en la playlist";
-        }
 
         store.list.remove(0);
         playNextSong(store);
@@ -241,6 +235,7 @@ export default {
       case "url": {
         const url = interaction.options.getString("url");
         if (url === null) throw "URL no encotrada en opciones";
+
         const urls = parseUrlsFromInput(url);
         if (urls.length === 0) throw "URL no valida";
         if (urls.some((value) => !URL.canParse(value))) throw "URL no valida";
@@ -263,21 +258,19 @@ export default {
             }
             await interaction.followUp(
               songs.length === 1
-                ? `Canción añadida: ${songs[0].url}`
-                : `Canciones añadidas: ${songs.length}`,
+                ? `${interaction.member} añadió: ${songs[0].url}`
+                : `${interaction.member} añadió: ${songs.length} canciones`,
             );
           } else if (i.customId === "cancel") {
             await interaction.followUp("Operación cancelada.");
           }
         });
 
-        collector.on("end", async (collected) => {
-          if (collected.size === 0) {
-            await interaction.followUp({
-              content: "Operación cancelada. Te quedaste sin tiempo",
-              flags: MessageFlags.Ephemeral,
-            });
-          }
+        collector.on("end", (collected) => {
+          if (collected.size === 0)
+            throw new UnImportantError(
+              "Operación cancelada. Te quedaste sin tiempo",
+            );
         });
         break;
       }
@@ -285,6 +278,7 @@ export default {
       case "query": {
         const query = interaction.options.getString("query");
         if (query === null) throw "URL no encotrada en opciones";
+
         const song = await music.search(query);
         const collector = await createConfirmButtonCollector(
           interaction,
@@ -303,13 +297,11 @@ export default {
           }
         });
 
-        collector.on("end", async (collected) => {
-          if (collected.size === 0) {
-            await interaction.followUp({
-              content: "Operación cancelada. Te quedaste sin tiempo",
-              flags: MessageFlags.Ephemeral,
-            });
-          }
+        collector.on("end", (collected) => {
+          if (collected.size === 0)
+            throw new UnImportantError(
+              "Operación cancelada. Te quedaste sin tiempo",
+            );
         });
         break;
       }
@@ -356,11 +348,7 @@ export default {
       }
 
       default:
-        await interaction.reply({
-          content: "Aún no se ha implementado.",
-          flags: MessageFlags.Ephemeral,
-        });
-        break;
+        throw new UnImportantError("Operación no implementada");
     }
   },
 };

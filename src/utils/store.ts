@@ -1,12 +1,31 @@
 import { ChatInputCommandInteraction, GuildMember } from "discord.js";
-import { getGuildState } from "../store.ts";
+import { AudioPlayer, createAudioPlayer } from "@discordjs/voice";
+import { Playlist, Song } from "../playlist/playlist.ts";
+import { NotInGuildError } from "../errors/errors.ts";
 
-class NotInGuildError extends Error {
-  constructor() {
-    super("Este commando solo puede ser ejecutado en una guild.");
-    this.name = "NotInGuildError";
-    Object.setPrototypeOf(this, NotInGuildError.prototype);
+export interface Store {
+  list: Playlist;
+  player: AudioPlayer;
+  currentSong: Song | null;
+  listenerActive: boolean;
+}
+
+const guilds = new Map<string, Store>();
+
+export function getGuildState(guildId: string): Store {
+  const store = guilds.get(guildId);
+  if (!store) {
+    const newStore: Store = {
+      list: new Playlist(),
+      player: createAudioPlayer(),
+      currentSong: null,
+      listenerActive: false,
+    };
+    newStore.player.on("error", console.error);
+    guilds.set(guildId, newStore);
+    return newStore;
   }
+  return store;
 }
 
 export function getStore(interaction: ChatInputCommandInteraction) {
