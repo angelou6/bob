@@ -5,6 +5,6 @@ export default {
     .setName("source")
     .setDescription("Obtener el código del bot"),
   async execute(interaction: ChatInputCommandInteraction) {
-    await interaction.reply("Aún no está disponible");
+    await interaction.reply("https://github.com/angelou6/bob");
   },
 };
