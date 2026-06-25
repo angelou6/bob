@@ -1,20 +1,20 @@
-import { Innertube, UniversalCache } from "youtubei.js";
+import { Innertube, Log, UniversalCache } from "youtubei.js";
 import { getSpotifyData } from "./spotify.ts";
 import { preattyTime } from "../utils/time.ts";
-import { sourceExists } from "../utils/ping.ts";
 
-const yt = await Innertube.create({ cache: new UniversalCache(false) });
+Log.setLevel(0);
+const yt = await Innertube.create({ cache: new UniversalCache(true) });
 
-export interface song {
+export interface Song {
   title: string;
   url: string;
   duration: string;
 }
 
-export class playlist {
-  songs: song[] = [];
+export class Playlist {
+  songs: Song[] = [];
 
-  public add(s: song) {
+  public add(s: Song) {
     this.songs.push(s);
   }
 
@@ -34,36 +34,38 @@ export class playlist {
     )
       throw "Index de la canción es invalido";
 
-    const element = this.songs.slice(from, 1)[0];
+    const [element] = this.songs.splice(from, 1);
     this.songs.splice(to, 0, element);
   }
 
-  public list(): string {
-    return this.songs
-      .map((x, i) => `${i}) ${x.title} - ${x.duration}`)
-      .join("\n");
+  public display(): string {
+    return (
+      this.songs.map((x, i) => `${i}) ${x.title} - ${x.duration}`).join("\n") ||
+      "No hay canciones en la lista de reproducción."
+    );
   }
 }
 
-export async function getAudioSource(url: string): Promise<string> {
-  let source = "";
-  const decoder = new TextDecoder();
+export function getAudioSource(url: string): ReadableStream<Uint8Array> {
   const command = new Deno.Command("yt-dlp", {
-    args: ["-f", "ba", "--get-url", url],
+    args: [
+      "--no-playlist",
+      "-f",
+      "bestaudio[ext=webm]/bestaudio",
+      "-o",
+      "-",
+      "--quiet",
+      url,
+    ],
+    stdout: "piped",
   });
 
-  do {
-    const { code, stdout } = await command.output();
-    if (code > 0) throw "error usando yt-dlp";
-    source = decoder.decode(stdout);
-  } while (!sourceExists(source));
-
-  return source;
+  const process = command.spawn();
+  return process.stdout;
 }
 
-async function songFromYoutubeUrl(url: string): Promise<song> {
-  const endpoint = await yt.resolveURL(url);
-  const info = await yt.getInfo(endpoint);
+async function songFromYoutubeUrl(url: string): Promise<Song> {
+  const info = await yt.getInfo(await yt.resolveURL(url));
 
   if (
     !info.basic_info.title ||
@@ -74,12 +76,12 @@ async function songFromYoutubeUrl(url: string): Promise<song> {
 
   return {
     title: info.basic_info.title,
-    url: url,
+    url: `https://www.youtube.com/watch?v=${info.basic_info.id}`,
     duration: preattyTime(info.basic_info.duration),
   };
 }
 
-export async function search(query: string): Promise<song> {
+export async function search(query: string): Promise<Song> {
   const res = await yt.music.search(query, { type: "song" });
   const firstSong = res.songs?.contents?.[0];
   if (!firstSong || !firstSong.title || !firstSong.id || !firstSong.duration)
@@ -92,7 +94,7 @@ export async function search(query: string): Promise<song> {
   };
 }
 
-export async function songfromUrl(url: string): Promise<song> {
+export async function songfromUrl(url: string): Promise<Song> {
   if (url.includes("spotify")) {
     const songData = await getSpotifyData(url);
     return search(`${songData.title} ${songData.author}`);
