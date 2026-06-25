@@ -58,10 +58,18 @@ export function getAudioSource(url: string): ReadableStream<Uint8Array> {
       url,
     ],
     stdout: "piped",
+    stderr: "inherit",
   });
 
   const process = command.spawn();
-  return process.stdout;
+  const stream = process.stdout.pipeThrough(
+    new TransformStream({
+      flush() {
+        process.status.catch(() => {});
+      },
+    }),
+  );
+  return stream;
 }
 
 async function songFromYoutubeUrl(url: string): Promise<Song> {

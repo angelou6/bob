@@ -4,7 +4,7 @@ import {
   MessageFlags,
 } from "discord.js";
 import { getVoiceConnection } from "@discordjs/voice";
-import { userAndBotInSameVC } from "../../utils/memory.ts";
+import { getStore, userAndBotInSameVC } from "../../utils/memory.ts";
 
 export default {
   data: new SlashCommandBuilder()
@@ -19,6 +19,8 @@ export default {
       return;
     }
 
+    const store = getStore(interaction);
+
     const connection = getVoiceConnection(interaction.guildId);
     if (connection) {
       if (!(await userAndBotInSameVC(interaction))) {
@@ -28,6 +30,9 @@ export default {
         });
         return;
       }
+
+      store.player.removeAllListeners("stateChange");
+      store.listenerActive = false;
       connection.destroy();
       await interaction.reply({
         content: "Reply para que discord no se ponga a llorar.",

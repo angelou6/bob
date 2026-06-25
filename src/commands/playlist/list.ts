@@ -16,6 +16,7 @@ import {
   StreamType,
 } from "@discordjs/voice";
 import { Readable } from "node:stream";
+import { Store } from "../../store.ts";
 
 function parseUrlsFromInput(value: string): string[] {
   return value
@@ -67,6 +68,34 @@ async function createConfirmButtonCollector(
   });
 
   return collector;
+}
+
+function playNextSong(store: Store) {
+  store.currentSong = store.list.songs[0];
+  const webStream = music.getAudioSource(store.currentSong.url);
+  const nodeStream = Readable.from(webStream);
+  const audioResource = createAudioResource(nodeStream, {
+    inputType: StreamType.WebmOpus,
+  });
+  store.player.play(audioResource);
+}
+
+function setupPlayerListener(store: Store) {
+  store.player.on("stateChange", (oldState, newState) => {
+    if (
+      oldState.status === AudioPlayerStatus.Playing &&
+      newState.status === AudioPlayerStatus.Idle
+    ) {
+      if (store.list.songs.length > 0) {
+        store.list.remove(0);
+        if (store.list.songs.length > 0) {
+          playNextSong(store);
+        } else {
+          store.currentSong = null;
+        }
+      }
+    }
+  });
 }
 
 export default {
@@ -156,6 +185,11 @@ export default {
     const store = getStore(interaction);
     const subcommand = interaction.options.getSubcommand();
 
+    if (!store.listenerActive) {
+      setupPlayerListener(store);
+      store.listenerActive = true;
+    }
+
     switch (subcommand) {
       case "play": {
         if (store.list.songs.length === 0)
@@ -165,18 +199,12 @@ export default {
 
         if (store.player.state.status === AudioPlayerStatus.Paused) {
           store.player.unpause();
-          interaction.followUp("Reproduciondo audio.");
+          await interaction.followUp("Reproduciondo audio.");
         } else if (store.player.state.status === AudioPlayerStatus.Playing) {
-          interaction.followUp("El audio ya se esta reproduciendo.");
+          await interaction.followUp("El audio ya se esta reproduciendo.");
         } else {
-          store.currentSong = store.list.songs[0];
-          const webStream = music.getAudioSource(store.currentSong.url);
-          const nodeStream = Readable.from(webStream);
-          const audioResource = createAudioResource(nodeStream, {
-            inputType: StreamType.WebmOpus,
-          });
-          store.player.play(audioResource);
-          interaction.followUp("Reproduciondo audio.");
+          playNextSong(store);
+          await interaction.followUp("Reproduciondo audio.");
         }
         break;
       }
@@ -186,13 +214,22 @@ export default {
           throw "No hay canciones en la playlist";
 
         if (store.player.state.status === AudioPlayerStatus.Paused) {
-          interaction.reply("El audio ya está pausado.");
+          await interaction.reply("El audio ya está pausado.");
         } else {
           store.player.pause();
-          interaction.reply("Audio pausado.");
+          await interaction.reply("Audio pausado.");
         }
         break;
       }
+
+      case "skip":
+        if (store.list.songs.length <= 1)
+          throw "No hay suficientes canciones en la playlist";
+
+        store.list.remove(0);
+        playNextSong(store);
+        await interaction.reply("Skipped.");
+        break;
 
       case "list":
         await interaction.reply(store.list.display());
@@ -275,24 +312,43 @@ export default {
       }
 
       case "remove": {
-        if (store.list.songs.length > 0) {
-          const id = interaction.options.getNumber("id");
-          if (id === null) throw "ID no encotrada en opciones";
-          store.list.remove(id);
+        const id = interaction.options.getNumber("id");
+        if (id === null) throw "ID no encotrada en opciones";
+        if (
+          id === 0 &&
+          store.player.state.status === AudioPlayerStatus.Playing
+        ) {
+          await interaction.reply(
+            "No puedes borrar la canción en reproducción",
+          );
+          return;
         }
-        await interaction.reply(store.list.display());
+
+        if (store.list.songs.length > 0) {
+          store.list.remove(id);
+          await interaction.reply(store.list.display());
+        }
         break;
       }
 
       case "move": {
-        if (store.list.songs.length > 0) {
-          const from = interaction.options.getNumber("from");
-          const to = interaction.options.getNumber("to");
-          if (from === null) throw "ID from no encotrada en opciones";
-          else if (to === null) throw "ID to no encotrada en opciones";
-          store.list.move(from, to);
+        const from = interaction.options.getNumber("from");
+        const to = interaction.options.getNumber("to");
+        if (from === null || to === null) throw "ID no encotrada en opciones";
+        if (
+          (from === 0 || to === 0) &&
+          store.player.state.status === AudioPlayerStatus.Playing
+        ) {
+          await interaction.reply(
+            "No puedes borrar la canción en reproducción",
+          );
+          return;
         }
-        await interaction.reply(store.list.display());
+
+        if (store.list.songs.length > 0) {
+          store.list.move(from, to);
+          await interaction.reply(store.list.display());
+        }
         break;
       }
 
