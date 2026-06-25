@@ -37,7 +37,7 @@ if (TOKEN && APP_ID) {
         })) as ApplicationCommand,
       );
     } else {
-      throw "Uso incorrecto. Uso: bun run deploy <local|global>";
+      throw "Uso incorrecto. Uso: deno run populate <local|global>";
     }
     console.log(`Refresh existoso. Comandos refrescados ${data.length}`);
   } catch (error) {
