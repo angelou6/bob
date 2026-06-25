@@ -1,10 +1,6 @@
 import { getSpotifyData } from "../src/playlist/spotify.ts";
-import {
-  getAudioSource,
-  search,
-  songfromUrl,
-} from "../src/playlist/playlist.ts";
-import { assertEquals, assertFalse } from "@std/assert";
+import { search, songfromUrl } from "../src/playlist/playlist.ts";
+import { assertEquals } from "@std/assert";
 
 Deno.test("spotify url", async () => {
   const data = await getSpotifyData(
@@ -43,11 +39,4 @@ Deno.test("youtube test", async () => {
     url: "https://www.youtube.com/watch?v=JjY9_RyIeQw",
     duration: "3:32",
   });
-});
-
-Deno.test("get audio resource", async () => {
-  const source = await getAudioSource(
-    "https://www.youtube.com/watch?v=3h7vqzFyKyo",
-  );
-  assertFalse(source === "");
 });

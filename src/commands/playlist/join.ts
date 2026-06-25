@@ -1,15 +1,15 @@
 import {
   ChatInputCommandInteraction,
-  SlashCommandBuilder,
   DiscordAPIError,
   MessageFlags,
+  SlashCommandBuilder,
 } from "discord.js";
 import {
   entersState,
   joinVoiceChannel,
   VoiceConnectionStatus,
 } from "@discordjs/voice";
-import { getStore, getUserVC, getBotVC } from "../../utils/memory.ts";
+import { getBotVC, getStore, getUserVC } from "../../utils/memory.ts";
 
 class BotInVCError extends Error {
   constructor() {

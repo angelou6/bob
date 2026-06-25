@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "bot": "deno run --watch --env -A ./src/main.ts"
+    "bot": "deno run --watch --env -A ./src/main.ts",
     "populate": "deno run --env -A ./src/scripts/populate.ts",
     "delete": "deno run --env -A ./src/scripts/delete.ts"
   },

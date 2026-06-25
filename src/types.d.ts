@@ -1,6 +1,6 @@
 import type {
-  Collection,
   ChatInputCommandInteraction,
+  Collection,
   SlashCommandBuilder,
 } from "discord.js";
 

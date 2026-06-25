@@ -1,7 +1,7 @@
 import {
   ChatInputCommandInteraction,
-  SlashCommandBuilder,
   MessageFlags,
+  SlashCommandBuilder,
 } from "discord.js";
 import { getVoiceConnection } from "@discordjs/voice";
 import { getStore, userAndBotInSameVC } from "../../utils/memory.ts";

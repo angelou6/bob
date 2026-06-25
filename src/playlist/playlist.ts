@@ -19,20 +19,23 @@ export class Playlist {
   }
 
   public remove(index: number) {
-    if (this.songs[index] === undefined)
+    if (this.songs[index] === undefined) {
       throw "Index de la canción es invalido";
+    }
     this.songs.splice(index, 1);
   }
 
   public move(from: number, to: number) {
-    if (this.songs.length < 2)
+    if (this.songs.length < 2) {
       throw "No hay suficientes canciones en la playlist";
+    }
     if (
       this.songs[from] === undefined ||
       this.songs[to] === undefined ||
       to == from
-    )
+    ) {
       throw "Index de la canción es invalido";
+    }
 
     const [element] = this.songs.splice(from, 1);
     this.songs.splice(to, 0, element);
@@ -79,8 +82,9 @@ async function songFromYoutubeUrl(url: string): Promise<Song> {
     !info.basic_info.title ||
     !info.basic_info.id ||
     !info.basic_info.duration
-  )
+  ) {
     throw "No se pudo encontrar canción";
+  }
 
   return {
     title: info.basic_info.title,
@@ -92,8 +96,9 @@ async function songFromYoutubeUrl(url: string): Promise<Song> {
 export async function search(query: string): Promise<Song> {
   const res = await yt.music.search(query, { type: "song" });
   const firstSong = res.songs?.contents?.[0];
-  if (!firstSong || !firstSong.title || !firstSong.id || !firstSong.duration)
+  if (!firstSong || !firstSong.title || !firstSong.id || !firstSong.duration) {
     throw "No se pudo encontrar canción";
+  }
 
   return {
     title: firstSong.title,
