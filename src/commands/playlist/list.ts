@@ -26,10 +26,9 @@ function parseUrlsFromInput(value: string): string[] {
 }
 
 function formatBatchConfirmation(songs: music.Song[]): string {
-  const header =
-    songs.length === 1
-      ? "¿Es esta la canción que quieres añadir?"
-      : `¿Son estas las ${songs.length} canciones que quieres añadir?`;
+  const header = songs.length === 1
+    ? "¿Es esta la canción que quieres añadir?"
+    : `¿Son estas las ${songs.length} canciones que quieres añadir?`;
 
   return [
     header,
@@ -105,16 +104,16 @@ export default {
     .addSubcommand((subcommand) =>
       subcommand
         .setName("list")
-        .setDescription("Muestra la lista de reproducción."),
+        .setDescription("Muestra la lista de reproducción.")
     )
     .addSubcommand((subcommand) =>
-      subcommand.setName("play").setDescription("Inicia la reproducción."),
+      subcommand.setName("play").setDescription("Inicia la reproducción.")
     )
     .addSubcommand((subcommand) =>
-      subcommand.setName("pause").setDescription("Detiene la reproducción."),
+      subcommand.setName("pause").setDescription("Detiene la reproducción.")
     )
     .addSubcommand((subcommand) =>
-      subcommand.setName("skip").setDescription("Pasa a la siguiente canción."),
+      subcommand.setName("skip").setDescription("Pasa a la siguiente canción.")
     )
     .addSubcommand((subcommand) =>
       subcommand
@@ -124,14 +123,14 @@ export default {
           option
             .setName("from")
             .setDescription("ID de la canción a mover.")
-            .setRequired(true),
+            .setRequired(true)
         )
         .addNumberOption((option) =>
           option
             .setName("to")
             .setDescription("ID del lugar de destino.")
-            .setRequired(true),
-        ),
+            .setRequired(true)
+        )
     )
     .addSubcommand((subcommand) =>
       subcommand
@@ -141,8 +140,8 @@ export default {
           option
             .setName("id")
             .setDescription("ID de la canción a eliminar.")
-            .setRequired(true),
-        ),
+            .setRequired(true)
+        )
     )
     .addSubcommandGroup((group) =>
       group
@@ -158,8 +157,8 @@ export default {
               option
                 .setName("url")
                 .setDescription("URLs a añadir, separadas por espacios.")
-                .setRequired(true),
-            ),
+                .setRequired(true)
+            )
         )
         .addSubcommand((sub) =>
           sub
@@ -169,9 +168,9 @@ export default {
               option
                 .setName("query")
                 .setDescription("Query de busqueda.")
-                .setRequired(true),
-            ),
-        ),
+                .setRequired(true)
+            )
+        )
     ),
   async execute(interaction: ChatInputCommandInteraction) {
     if (!(await userAndBotInSameVC(interaction))) {
@@ -192,8 +191,9 @@ export default {
 
     switch (subcommand) {
       case "play": {
-        if (store.list.songs.length === 0)
+        if (store.list.songs.length === 0) {
           throw "No hay canciones en la playlist";
+        }
 
         await interaction.deferReply();
 
@@ -210,8 +210,9 @@ export default {
       }
 
       case "pause": {
-        if (store.list.songs.length === 0)
+        if (store.list.songs.length === 0) {
           throw "No hay canciones en la playlist";
+        }
 
         if (store.player.state.status === AudioPlayerStatus.Paused) {
           await interaction.reply("El audio ya está pausado.");
@@ -223,8 +224,9 @@ export default {
       }
 
       case "skip":
-        if (store.list.songs.length <= 1)
+        if (store.list.songs.length <= 1) {
           throw "No hay suficientes canciones en la playlist";
+        }
 
         store.list.remove(0);
         playNextSong(store);

@@ -1,9 +1,9 @@
 import {
+  type CacheType,
   Client,
   Collection,
   Events,
   GatewayIntentBits,
-  type CacheType,
   type Interaction,
   MessageFlags,
 } from "discord.js";
