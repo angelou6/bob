@@ -3,13 +3,15 @@ import {
   Collection,
   Events,
   GatewayIntentBits,
-  MessageFlags,
   type CacheType,
   type Interaction,
+  MessageFlags,
 } from "discord.js";
 import { getCommandsFiles } from "./utils/files.ts";
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
+});
 client.commands = new Collection();
 
 for (const file of await getCommandsFiles()) {
@@ -40,12 +42,12 @@ client.on(
       console.error(error);
       if (interaction.replied || interaction.deferred) {
         await interaction.followUp({
-          content: "Error ejecutando ese comando",
+          content: `❌ ${error}`,
           flags: MessageFlags.Ephemeral,
         });
       } else {
         await interaction.reply({
-          content: "Error ejecutando ese comando",
+          content: `❌ ${error}`,
           flags: MessageFlags.Ephemeral,
         });
       }
