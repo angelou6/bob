@@ -3,7 +3,11 @@ import { getSpotifyData } from "./spotify.ts";
 import { preattyTime } from "../utils/time.ts";
 
 Log.setLevel(0);
-const yt = await Innertube.create({ cache: new UniversalCache(true) });
+const yt = await Innertube.create({
+  cache: new UniversalCache(false),
+  retrieve_player: false,
+  generate_session_locally: true,
+});
 
 export interface Song {
   title: string;
@@ -23,6 +27,16 @@ export class Playlist {
       throw "Index de la canción es invalido";
     }
     this.songs.splice(index, 1);
+  }
+
+  public removeFromSong(s: Song) {
+    for (let i = 0; i < this.songs.length; i++) {
+      const song = this.songs[i];
+      if (s == song) {
+        this.remove(i);
+        return;
+      }
+    }
   }
 
   public move(from: number, to: number) {

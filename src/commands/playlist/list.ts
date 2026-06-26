@@ -5,7 +5,6 @@ import {
   CacheType,
   ChatInputCommandInteraction,
   ComponentType,
-  MessageFlags,
   SlashCommandBuilder,
 } from "discord.js";
 import * as music from "../../playlist/playlist.ts";
@@ -28,8 +27,8 @@ function parseUrlsFromInput(value: string): string[] {
 function formatBatchConfirmation(songs: music.Song[]): string {
   const header =
     songs.length === 1
-      ? "¿Es esta la canción que quieres añadir?"
-      : `¿Son estas las ${songs.length} canciones que quieres añadir?`;
+      ? "Se eñadio la canción"
+      : `se añadieron ${songs.length} canciones`;
 
   return [
     header,
@@ -41,30 +40,22 @@ async function createConfirmButtonCollector(
   interaction: ChatInputCommandInteraction<CacheType>,
   content: string,
 ) {
-  const confirm = new ButtonBuilder()
-    .setCustomId("confirm")
-    .setLabel("Confirmar")
-    .setStyle(ButtonStyle.Primary);
   const cancel = new ButtonBuilder()
     .setCustomId("cancel")
     .setLabel("Cancelar")
-    .setStyle(ButtonStyle.Secondary);
-  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-    cancel,
-    confirm,
-  );
+    .setStyle(ButtonStyle.Danger);
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(cancel);
 
   await interaction.reply({
     content,
     components: [row],
-    flags: MessageFlags.Ephemeral,
   });
 
   const response = await interaction.fetchReply();
 
   const collector = response.createMessageComponentCollector({
     componentType: ComponentType.Button,
-    time: 30_000,
+    time: 10_000,
   });
 
   return collector;
@@ -243,34 +234,32 @@ export default {
         const songs = await Promise.all(
           urls.map((value) => music.songfromUrl(value)),
         );
+
+        for (const song of songs) {
+          store.list.add(song);
+        }
         const collector = await createConfirmButtonCollector(
           interaction,
           formatBatchConfirmation(songs),
         );
 
         collector.on("collect", async (i) => {
-          await i.deferUpdate();
-          await interaction.deleteReply();
-
-          if (i.customId === "confirm") {
+          if (i.customId === "cancel") {
             for (const song of songs) {
-              store.list.add(song);
+              store.list.removeFromSong(song);
             }
-            await interaction.followUp(
-              songs.length === 1
-                ? `${interaction.member} añadió: ${songs[0].url}`
-                : `${interaction.member} añadió: ${songs.length} canciones`,
-            );
-          } else if (i.customId === "cancel") {
-            await interaction.followUp("Operación cancelada.");
+            await i.update({
+              content:
+                songs.length === 1
+                  ? "Se removió la cancion"
+                  : `Se removieron ${songs.length} canciones`,
+              components: [],
+            });
           }
         });
 
         collector.on("end", (collected) => {
-          if (collected.size === 0)
-            throw new UnImportantError(
-              "Operación cancelada. Te quedaste sin tiempo",
-            );
+          if (collected.size === 0) interaction.editReply({ components: [] });
         });
         break;
       }
@@ -280,28 +269,24 @@ export default {
         if (query === null) throw "URL no encotrada en opciones";
 
         const song = await music.search(query);
+        store.list.add(song);
         const collector = await createConfirmButtonCollector(
           interaction,
           song.url,
         );
 
         collector.on("collect", async (i) => {
-          await i.deferUpdate();
-          await interaction.deleteReply();
-
-          if (i.customId === "confirm") {
-            store.list.add(song);
-            await interaction.followUp(`Canción añadida: ${song.url}`);
-          } else if (i.customId === "cancel") {
-            await interaction.followUp("Operación cancelada.");
+          if (i.customId === "cancel") {
+            store.list.removeFromSong(song);
+            await i.update({
+              content: "Se removió la canción",
+              components: [],
+            });
           }
         });
 
         collector.on("end", (collected) => {
-          if (collected.size === 0)
-            throw new UnImportantError(
-              "Operación cancelada. Te quedaste sin tiempo",
-            );
+          if (collected.size === 0) interaction.editReply({ components: [] });
         });
         break;
       }

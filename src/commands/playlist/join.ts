@@ -1,8 +1,4 @@
-import {
-  ChatInputCommandInteraction,
-  SlashCommandBuilder,
-  MessageFlags,
-} from "discord.js";
+import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 import {
   entersState,
   joinVoiceChannel,
@@ -32,9 +28,6 @@ export default {
     await entersState(connection, VoiceConnectionStatus.Ready, 10_000);
     connection.subscribe(store.player);
 
-    await interaction.reply({
-      content: "Conectado.",
-      flags: MessageFlags.Ephemeral,
-    });
+    await interaction.reply(`Conectado en el canal ${userVC}`);
   },
 };
