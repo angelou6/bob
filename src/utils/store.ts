@@ -1,7 +1,14 @@
 import { ChatInputCommandInteraction, GuildMember } from "discord.js";
-import { AudioPlayer, createAudioPlayer } from "@discordjs/voice";
+import {
+  AudioPlayer,
+  createAudioPlayer,
+  createAudioResource,
+  StreamType,
+} from "@discordjs/voice";
 import { Playlist, Song } from "../playlist/playlist.ts";
 import { NotInGuildError } from "../errors/errors.ts";
+import * as music from "../playlist/playlist.ts";
+import { Readable } from "node:stream";
 
 export interface Store {
   list: Playlist;
@@ -61,4 +68,14 @@ export async function userAndBotInSameVC(
   const userVC = await getUserVC(interaction);
   const botVC = await getBotVC(interaction);
   return userVC != null && botVC != null && userVC === botVC;
+}
+
+export function playNextSong(store: Store) {
+  store.currentSong = store.list.songs[0];
+  const webStream = music.getAudioSource(store.currentSong.url);
+  const nodeStream = Readable.from(webStream);
+  const audioResource = createAudioResource(nodeStream, {
+    inputType: StreamType.WebmOpus,
+  });
+  store.player.play(audioResource);
 }
