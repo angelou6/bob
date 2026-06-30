@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 import { getStore, userAndBotInSameVC } from "../../utils/store.ts";
 import { AudioPlayerStatus } from "@discordjs/voice";
 import { UnImportantError, UserNotInSameVCError } from "../../errors/errors.ts";
@@ -8,8 +8,9 @@ export default {
     .setName("pause")
     .setDescription("Detiene la reproducción."),
   execute: async (interaction: ChatInputCommandInteraction) => {
-    if (!(await userAndBotInSameVC(interaction)))
+    if (!(await userAndBotInSameVC(interaction))) {
       throw new UserNotInSameVCError();
+    }
 
     const store = getStore(interaction);
 

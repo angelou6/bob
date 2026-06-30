@@ -11,7 +11,7 @@ deno install
 To run:
 
 ```bash
-deno run bot
+deno run bob
 ```
 
 This project was created using `deno init` in deno v2.8.3.

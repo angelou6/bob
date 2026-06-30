@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 import { AudioPlayerStatus } from "@discordjs/voice";
 import { getStore, userAndBotInSameVC } from "../../utils/store.ts";
 import { UserNotInSameVCError } from "../../errors/errors.ts";
@@ -11,17 +11,18 @@ export default {
       option
         .setName("from")
         .setDescription("ID de la canción a mover.")
-        .setRequired(true),
+        .setRequired(true)
     )
     .addNumberOption((option) =>
       option
         .setName("to")
         .setDescription("ID del lugar de destino.")
-        .setRequired(true),
+        .setRequired(true)
     ),
   execute: async (interaction: ChatInputCommandInteraction) => {
-    if (!(await userAndBotInSameVC(interaction)))
+    if (!(await userAndBotInSameVC(interaction))) {
       throw new UserNotInSameVCError();
+    }
 
     const store = getStore(interaction);
 

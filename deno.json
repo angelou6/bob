@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "bot": "deno run --env --allow-env --allow-read --allow-net --allow-ffi --allow-run --allow-write ./src/main.ts",
+    "bob": "deno run --env --allow-env --allow-read --allow-net --allow-ffi --allow-run --allow-write ./src/main.ts",
     "populate": "deno run --env --allow-env --allow-read --allow-net --allow-ffi --allow-write ./src/scripts/populate.ts",
     "delete": "deno run --env --allow-env --allow-net ./src/scripts/delete.ts"
   },

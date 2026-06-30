@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 import {
   getStore,
   playNextSong,
@@ -11,13 +11,15 @@ export default {
     .setName("skip")
     .setDescription("Pasa a la siguiente canción."),
   execute: async (interaction: ChatInputCommandInteraction) => {
-    if (!(await userAndBotInSameVC(interaction)))
+    if (!(await userAndBotInSameVC(interaction))) {
       throw new UserNotInSameVCError();
+    }
 
     const store = getStore(interaction);
 
-    if (store.list.songs.length <= 1)
+    if (store.list.songs.length <= 1) {
       throw "No hay suficientes canciones en la playlist";
+    }
 
     store.list.remove(0);
     playNextSong(store);

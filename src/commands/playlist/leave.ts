@@ -1,7 +1,7 @@
 import {
   ChatInputCommandInteraction,
-  SlashCommandBuilder,
   MessageFlags,
+  SlashCommandBuilder,
 } from "discord.js";
 import { getVoiceConnection } from "@discordjs/voice";
 import { getStore, userAndBotInSameVC } from "../../utils/store.ts";
@@ -12,15 +12,17 @@ export default {
     .setName("leave")
     .setDescription("Hace que el bot se salga del vc"),
   async execute(interaction: ChatInputCommandInteraction) {
-    if (!interaction.inCachedGuild())
+    if (!interaction.inCachedGuild()) {
       throw new UnImportantError("Este comando solo puede correr en un Guild");
+    }
 
     const store = getStore(interaction);
 
     const connection = getVoiceConnection(interaction.guildId);
     if (connection) {
-      if (!(await userAndBotInSameVC(interaction)))
+      if (!(await userAndBotInSameVC(interaction))) {
         throw new UnImportantError("Necesitas estar en el mismo VC que yo.");
+      }
 
       store.player.removeAllListeners("stateChange");
       store.listenerActive = false;
