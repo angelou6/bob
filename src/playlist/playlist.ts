@@ -39,6 +39,22 @@ export class Playlist {
     }
   }
 
+  public semiShuffle() {
+    const tempArr = this.songs.slice(1);
+    for (let i = 0, len = tempArr.length; i < len; i++) {
+      const j = Math.floor(Math.random() * len);
+      [tempArr[i], tempArr[j]] = [tempArr[j], tempArr[i]];
+    }
+    this.songs = [this.songs[0], ...tempArr];
+  }
+
+  public fullShuffle() {
+    for (let i = 0, len = this.songs.length; i < len; i++) {
+      const j = Math.floor(Math.random() * len);
+      [this.songs[i], this.songs[j]] = [this.songs[j], this.songs[i]];
+    }
+  }
+
   public move(from: number, to: number) {
     if (this.songs.length < 2) {
       throw "No hay suficientes canciones en la playlist";
