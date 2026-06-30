@@ -1,5 +1,5 @@
-import { Innertube, Log, UniversalCache } from "youtubei.js";
-import { getSpotifyData } from "./spotify.ts";
+import { Innertube, Log, UniversalCache, YTNodes } from "youtubei.js";
+import { getSpotifyData, getSpotifyPlaylist } from "./spotify.ts";
 import { preattyTime } from "../utils/time.ts";
 
 Log.setLevel(0);
@@ -63,6 +63,13 @@ export class Playlist {
   }
 }
 
+function parseUrlsFromInput(value: string): string[] {
+  return value
+    .split(/\s+/)
+    .map((url) => url.trim())
+    .filter(Boolean);
+}
+
 export function getAudioSource(url: string): ReadableStream<Uint8Array> {
   const command = new Deno.Command("yt-dlp", {
     args: [
@@ -89,7 +96,7 @@ export function getAudioSource(url: string): ReadableStream<Uint8Array> {
   return stream;
 }
 
-async function songFromYoutubeUrl(url: string): Promise<Song> {
+async function songsFromYoutubeUrl(url: string): Promise<Song> {
   const info = await yt.getInfo(await yt.resolveURL(url));
 
   if (
@@ -121,12 +128,51 @@ export async function search(query: string): Promise<Song> {
   };
 }
 
-export async function songfromUrl(url: string): Promise<Song> {
-  if (url.includes("spotify")) {
-    const songData = await getSpotifyData(url);
-    return search(`${songData.title} ${songData.author}`);
-  } else if (url.includes("youtube")) {
-    return songFromYoutubeUrl(url);
+export async function songsfromUrl(url: string): Promise<Song[]> {
+  const urls = parseUrlsFromInput(url);
+  if (urls.length === 0 || urls.some((value) => !URL.canParse(value))) {
+    throw "URL no valida";
   }
-  throw "No implementado";
+
+  const songs: Song[] = [];
+  for (const url of urls) {
+    if (url.includes("spotify")) {
+      if (url.includes("/album/") || url.includes("/playlist/")) {
+        const songData = await getSpotifyPlaylist(url);
+        const ytSongs = await Promise.all(
+          songData.map((song) => search(`${song.title} ${song.author}`)),
+        );
+        songs.push(...ytSongs);
+      } else if (url.includes("/track/")) {
+        const songData = await getSpotifyData(url);
+        songs.push(await search(`${songData.title} ${songData.author}`));
+      } else {
+        throw `URL "${url}" invalida`;
+      }
+    } else if (url.includes("youtube")) {
+      if (url.includes("/playlist?")) {
+        const id = new URL(url).searchParams.get("list");
+        if (!id) throw "ID no encontrada";
+        const playlist = await yt.music.getPlaylist(id);
+        for (const item of playlist.items) {
+          if (item instanceof YTNodes.MusicResponsiveListItem) {
+            if (!item.title || !item.id || !item.duration) {
+              throw `Video ${url} no encontrado.`;
+            }
+            songs.push({
+              title: item.title,
+              url: `https://www.youtube.com/watch?v=${item.id}`,
+              duration: item.duration.text,
+            });
+          }
+        }
+      } else {
+        songs.push(await songsFromYoutubeUrl(url));
+      }
+    } else {
+      throw "No implementado";
+    }
+  }
+
+  return songs;
 }
