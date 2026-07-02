@@ -168,19 +168,17 @@ export async function songsfromUrl(url: string): Promise<Song[]> {
     } else if (url.includes("youtube")) {
       if (url.includes("/playlist?")) {
         const id = new URL(url).searchParams.get("list");
-        if (!id) throw "ID no encontrada";
-        const playlist = await yt.music.getPlaylist(id);
+        const playlist = await yt.music.getPlaylist(id!);
         for (const item of playlist.items) {
-          if (item instanceof YTNodes.MusicResponsiveListItem) {
-            if (!item.title || !item.id || !item.duration) {
-              throw `Video ${url} no encontrado.`;
-            }
-            songs.push({
-              title: item.title,
-              url: `https://www.youtube.com/watch?v=${item.id}`,
-              duration: item.duration.text,
-            });
-          }
+          if (!(item instanceof YTNodes.MusicResponsiveListItem)) continue;
+          if (!item.title || !item.id || !item.duration)
+            throw `Video ${url} no encontrado.`;
+
+          songs.push({
+            title: item.title,
+            url: `https://www.youtube.com/watch?v=${item.id}`,
+            duration: item.duration.text,
+          });
         }
       } else {
         songs.push(await songsFromYoutubeUrl(url));
