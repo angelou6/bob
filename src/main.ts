@@ -9,6 +9,7 @@ import {
 } from "discord.js";
 import { getCommandsFiles } from "./utils/files.ts";
 import { UnImportantError } from "./errors/errors.ts";
+import { toFileUrl } from "@std/path";
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
@@ -16,7 +17,7 @@ const client = new Client({
 client.commands = new Collection();
 
 for (const file of await getCommandsFiles()) {
-  const command = await import(file).then((command) => command.default);
+  const command = await import(toFileUrl(file).href).then((c) => c.default);
   if ("data" in command && "execute" in command) {
     client.commands.set(command.data.name, command);
   } else {
