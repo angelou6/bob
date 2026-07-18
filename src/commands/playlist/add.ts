@@ -32,12 +32,10 @@ async function createConfirmButtonCollector(
     .setStyle(ButtonStyle.Danger);
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(cancel);
 
-  await interaction.reply({
+  const response = await interaction.editReply({
     content,
     components: [row],
   });
-
-  const response = await interaction.fetchReply();
 
   const collector = response.createMessageComponentCollector({
     componentType: ComponentType.Button,
@@ -83,6 +81,8 @@ export default {
     if (!(await userAndBotInSameVC(interaction))) {
       throw new UserNotInSameVCError();
     }
+
+    await interaction.deferReply();
 
     const store = getStore(interaction);
     const subcommand = interaction.options.getSubcommand();

@@ -42,16 +42,22 @@ client.on(
       await command.execute(interaction);
     } catch (error) {
       if (!(error instanceof UnImportantError)) console.error(error);
-      if (interaction.replied || interaction.deferred) {
-        await interaction.followUp({
-          content: `❌ ${error}`,
-          flags: MessageFlags.Ephemeral,
-        });
-      } else {
-        await interaction.reply({
-          content: `❌ ${error}`,
-          flags: MessageFlags.Ephemeral,
-        });
+      try {
+        if (interaction.replied) {
+          await interaction.followUp({
+            content: `❌ ${error}`,
+            flags: MessageFlags.Ephemeral,
+          });
+        } else if (interaction.deferred) {
+          await interaction.editReply({ content: `❌ ${error}` });
+        } else {
+          await interaction.reply({
+            content: `❌ ${error}`,
+            flags: MessageFlags.Ephemeral,
+          });
+        }
+      } catch (replyError) {
+        console.error("No se pudo responder a la interacción:", replyError);
       }
     }
   },
