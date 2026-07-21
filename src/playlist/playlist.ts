@@ -1,6 +1,5 @@
-import { Innertube, Log, UniversalCache, YTNodes } from "youtubei.js";
-import { getSpotifyData, getSpotifyPlaylist } from "./spotify.ts";
-import { preattyTime } from "../utils/time.ts";
+import { Innertube, Log, UniversalCache } from "youtubei.js";
+import { urlToSongs } from "./urls.ts";
 
 Log.setLevel(0);
 const yt = await Innertube.create({
@@ -112,24 +111,6 @@ export function getAudioSource(url: string): ReadableStream<Uint8Array> {
   return stream;
 }
 
-async function songsFromYoutubeUrl(url: string): Promise<Song> {
-  const info = await yt.getInfo(await yt.resolveURL(url));
-
-  if (
-    !info.basic_info.title ||
-    !info.basic_info.id ||
-    !info.basic_info.duration
-  ) {
-    throw "No se pudo encontrar canción";
-  }
-
-  return {
-    title: info.basic_info.title,
-    url: `https://www.youtube.com/watch?v=${info.basic_info.id}`,
-    duration: preattyTime(info.basic_info.duration),
-  };
-}
-
 export async function search(query: string): Promise<Song> {
   const res = await yt.music.search(query, { type: "song" });
   const firstSong = res.songs?.contents?.[0];
@@ -145,47 +126,15 @@ export async function search(query: string): Promise<Song> {
 }
 
 export async function songsfromUrl(url: string): Promise<Song[]> {
+  const songs: Song[] = [];
   const urls = parseUrlsFromInput(url);
+
   if (urls.length === 0 || urls.some((value) => !URL.canParse(value))) {
     throw "URL no valida";
   }
 
-  const songs: Song[] = [];
   for (const url of urls) {
-    if (url.includes("spotify")) {
-      if (url.includes("/album/") || url.includes("/playlist/")) {
-        const songData = await getSpotifyPlaylist(url);
-        const ytSongs = await Promise.all(
-          songData.map((song) => search(`${song.title} ${song.author}`)),
-        );
-        songs.push(...ytSongs);
-      } else if (url.includes("/track/")) {
-        const songData = await getSpotifyData(url);
-        songs.push(await search(`${songData.title} ${songData.author}`));
-      } else {
-        throw `URL "${url}" invalida`;
-      }
-    } else if (url.includes("youtube")) {
-      if (url.includes("/playlist?")) {
-        const id = new URL(url).searchParams.get("list");
-        const playlist = await yt.music.getPlaylist(id!);
-        for (const item of playlist.items) {
-          if (!(item instanceof YTNodes.MusicResponsiveListItem)) continue;
-          if (!item.title || !item.id || !item.duration)
-            throw `Video ${url} no encontrado.`;
-
-          songs.push({
-            title: item.title,
-            url: `https://www.youtube.com/watch?v=${item.id}`,
-            duration: item.duration.text,
-          });
-        }
-      } else {
-        songs.push(await songsFromYoutubeUrl(url));
-      }
-    } else {
-      throw "No implementado";
-    }
+    songs.push(...(await urlToSongs(url, yt)));
   }
 
   return songs;

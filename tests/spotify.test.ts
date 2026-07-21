@@ -2,7 +2,7 @@ import { assertEquals } from "@std/assert/equals";
 import { getSpotifyData } from "../src/playlist/spotify.ts";
 import { songsfromUrl } from "../src/playlist/playlist.ts";
 
-Deno.test("spotify url", async () => {
+Deno.test("url", async () => {
   const data = await getSpotifyData(
     "https://open.spotify.com/intl-es/track/5RJPyaKUYv1t45BSdgSKqu",
   );
@@ -12,7 +12,7 @@ Deno.test("spotify url", async () => {
   });
 });
 
-Deno.test("spotify url to youtube", async () => {
+Deno.test("url to youtube", async () => {
   const data = await songsfromUrl(
     "https://open.spotify.com/intl-es/track/5RJPyaKUYv1t45BSdgSKqu",
   );
@@ -25,7 +25,7 @@ Deno.test("spotify url to youtube", async () => {
   ]);
 });
 
-Deno.test("spotify playlist url", async () => {
+Deno.test("playlist url", async () => {
   const data = await songsfromUrl(
     "https://open.spotify.com/intl-es/album/49pb86COfdPTLKxLR0LWyX",
   );
