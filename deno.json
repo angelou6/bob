@@ -11,7 +11,7 @@
     "@std/assert": "jsr:@std/assert@^1.0.19",
     "@std/path": "jsr:@std/path@^1.1.6",
     "cheerio": "npm:cheerio@^1.2.0",
-    "discord.js": "npm:discord.js@^14.26.4",
+    "discord.js": "npm:discord.js@^14.27.0",
     "youtubei.js": "npm:youtubei.js@^17.2.0"
   },
   "nodeModulesDir": "auto",
