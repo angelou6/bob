@@ -15,7 +15,7 @@
     "url": "git+https://github.com/angelou6/bob.git"
   },
   "author": "angelo",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/angelou6/bob/issues"
   },
