@@ -15,6 +15,14 @@ export interface Song {
 	duration: string;
 }
 
+function swap<T>(arr: T[], i: number, j: number): void {
+	const a = arr[i];
+	const b = arr[j];
+	if (a === undefined || b === undefined) return;
+	arr[i] = b;
+	arr[j] = a;
+}
+
 export class Playlist {
 	songs: Song[] = [];
 
@@ -39,20 +47,17 @@ export class Playlist {
 		}
 	}
 
-	public semiShuffle() {
-		if (this.songs.length === 0) return;
-		const tempArr = this.songs.slice(1);
-		for (let i = 0, len = tempArr.length; i < len; i++) {
-			const j = Math.floor(Math.random() * len);
-			[tempArr[i], tempArr[j]] = [tempArr[j]!, tempArr[i]!];
+	public semiShuffle(): void {
+		for (let i = this.songs.length - 1; i > 1; i--) {
+			const j = 1 + Math.floor(Math.random() * i);
+			swap(this.songs, i, j);
 		}
-		this.songs = [this.songs[0]!, ...tempArr];
 	}
 
-	public fullShuffle() {
-		for (let i = 0, len = this.songs.length; i < len; i++) {
-			const j = Math.floor(Math.random() * len);
-			[this.songs[i], this.songs[j]] = [this.songs[j]!, this.songs[i]!];
+	public fullShuffle(): void {
+		for (let i = this.songs.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			swap(this.songs, i, j);
 		}
 	}
 
@@ -69,7 +74,8 @@ export class Playlist {
 		}
 
 		const [element] = this.songs.splice(from, 1);
-		this.songs.splice(to, 0, element!);
+		if (element === undefined) throw "elemento no existe";
+		this.songs.splice(to, 0, element);
 	}
 
 	public display(): string {

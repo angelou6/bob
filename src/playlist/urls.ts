@@ -47,7 +47,7 @@ function extractVideoId(url: string) {
 	];
 	for (const p of patterns) {
 		const m = url.match(p);
-		if (m) return m[1]!;
+		if (m) return m[1];
 	}
 	throw `No se pudo encontrar el videoId de ${url}`;
 }
@@ -70,7 +70,8 @@ export async function urlToSongs(url: string, yt: Innertube): Promise<Song[]> {
 		case "Youtube":
 			if (info.isPlaylist) {
 				const id = new URL(url).searchParams.get("list");
-				const playlist = await yt.music.getPlaylist(id!);
+				if (!id) throw "id del video no encontrada";
+				const playlist = await yt.music.getPlaylist(id);
 				const songs: Song[] = [];
 
 				for (const item of playlist.items) {
@@ -88,6 +89,7 @@ export async function urlToSongs(url: string, yt: Innertube): Promise<Song[]> {
 				return songs;
 			} else {
 				const id = extractVideoId(url);
+				if (!id) throw "id del video no encontrada";
 				const videoInfo = await yt.getBasicInfo(id);
 				if (
 					!videoInfo.basic_info.title ||
