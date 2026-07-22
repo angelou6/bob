@@ -1,21 +1,15 @@
-import * as path from "@std/path";
+import { readdir } from "node:fs/promises";
+import path, { join } from "node:path";
 
-export const COMMAND_BASE_PATH = path.join(Deno.cwd(), "src", "commands");
+export const COMMAND_BASE_PATH = path.join(process.cwd(), "dist", "commands");
 
 export async function getCommandsFiles(): Promise<string[]> {
-  const files: string[] = [];
+  const entries = await readdir(COMMAND_BASE_PATH, {
+    recursive: true,
+    withFileTypes: true,
+  });
 
-  async function walk(dir: string): Promise<void> {
-    for await (const entry of Deno.readDir(dir)) {
-      const fullPath = `${dir}/${entry.name}`;
-      if (entry.isDirectory) {
-        await walk(fullPath);
-      } else if (entry.isFile && entry.name.endsWith(".ts")) {
-        files.push(fullPath);
-      }
-    }
-  }
-
-  await walk(COMMAND_BASE_PATH);
-  return files;
+  return entries
+    .filter((e) => e.isFile() && e.name.endsWith("js"))
+    .map((e) => join(e.parentPath, e.name));
 }

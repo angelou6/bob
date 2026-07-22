@@ -1,8 +1,8 @@
-import Innertube from "youtubei.js/cf-worker";
-import { search, Song } from "./playlist.ts";
-import { getSpotifyData, getSpotifyPlaylist } from "./spotify.ts";
 import { YTNodes } from "youtubei.js";
-import { preattyTime } from "../utils/time.ts";
+import type Innertube from "youtubei.js/cf-worker";
+import { preattyTime } from "../utils/time.js";
+import { type Song, search } from "./playlist.js";
+import { getSpotifyData, getSpotifyPlaylist } from "./spotify.js";
 
 type Origin = "Youtube" | "Spotify";
 
@@ -47,7 +47,7 @@ function extractVideoId(url: string) {
   ];
   for (const p of patterns) {
     const m = url.match(p);
-    if (m) return m[1];
+    if (m) return m[1]!;
   }
   throw `No se pudo encontrar el videoId de ${url}`;
 }
@@ -97,11 +97,13 @@ export async function urlToSongs(url: string, yt: Innertube): Promise<Song[]> {
           throw "No se pudo encontrar canción";
         }
 
-        return [{
-          title: videoInfo.basic_info.title,
-          url: `https://www.youtube.com/watch?v=${videoInfo.basic_info.id}`,
-          duration: preattyTime(videoInfo.basic_info.duration),
-        }];
+        return [
+          {
+            title: videoInfo.basic_info.title,
+            url: `https://www.youtube.com/watch?v=${videoInfo.basic_info.id}`,
+            duration: preattyTime(videoInfo.basic_info.duration),
+          },
+        ];
       }
   }
 }

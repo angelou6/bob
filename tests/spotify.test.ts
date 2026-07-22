@@ -1,22 +1,25 @@
-import { assertEquals } from "@std/assert/equals";
-import { getSpotifyData } from "../src/playlist/spotify.ts";
-import { songsfromUrl } from "../src/playlist/playlist.ts";
+import assert from "node:assert";
+import { test } from "node:test";
+import { songsfromUrl } from "../src/playlist/playlist.js";
+import { getSpotifyData } from "../src/playlist/spotify.js";
 
-Deno.test("url", async () => {
+test("url", async () => {
   const data = await getSpotifyData(
     "https://open.spotify.com/intl-es/track/5RJPyaKUYv1t45BSdgSKqu",
   );
-  assertEquals(data, {
+
+  assert.deepStrictEqual(data, {
     title: "I Don't Want to Be an Engineer",
     author: "Ellie Minibot",
   });
 });
 
-Deno.test("url to youtube", async () => {
+test("url to youtube", async () => {
   const data = await songsfromUrl(
     "https://open.spotify.com/intl-es/track/5RJPyaKUYv1t45BSdgSKqu",
   );
-  assertEquals(data, [
+
+  assert.deepStrictEqual(data, [
     {
       title: "I Don't Want to Be an Engineer",
       url: "https://www.youtube.com/watch?v=3h7vqzFyKyo",
@@ -25,11 +28,12 @@ Deno.test("url to youtube", async () => {
   ]);
 });
 
-Deno.test("playlist url", async () => {
+test("playlist url", async () => {
   const data = await songsfromUrl(
     "https://open.spotify.com/intl-es/album/49pb86COfdPTLKxLR0LWyX",
   );
-  assertEquals(data, [
+
+  assert.deepStrictEqual(data, [
     {
       title: "Colorful Array",
       url: "https://www.youtube.com/watch?v=jeVbKwPtL_0",

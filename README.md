@@ -5,14 +5,14 @@ He bobin
 To install dependencies:
 
 ```bash
-deno install
+npm install
 ```
 
 To run:
 
 ```bash
-deno run bob
+npm run bob
 ```
 
-This project was created using `deno init` in deno v2.8.3.
-[Deno](https://deno.com/) is a JavaScript runtime.
+This project was created using `npm init` in node v22.22.2.
+[Node](https://nodejs.org) is a JavaScript runtime.

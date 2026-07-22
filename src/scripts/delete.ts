@@ -1,10 +1,10 @@
-import { ApplicationCommand, REST, Routes } from "discord.js";
+import { type ApplicationCommand, REST, Routes } from "discord.js";
 
-const TOKEN = Deno.env.get("DISCORD_TOKEN");
-const APP_ID = Deno.env.get("APP_ID");
-const GUILD_ID = Deno.env.get("GUILD_ID");
+const TOKEN = process.env.DISCORD_TOKEN;
+const APP_ID = process.env.APP_ID;
+const GUILD_ID = process.env.GUILD_ID;
 
-const target = Deno.args[0];
+const target = process.argv[0];
 
 if (TOKEN && APP_ID) {
   const rest = new REST().setToken(TOKEN);

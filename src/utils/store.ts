@@ -1,19 +1,19 @@
-import { ChatInputCommandInteraction, GuildMember } from "discord.js";
+import { Readable } from "node:stream";
 import {
-  AudioPlayer,
+  type AudioPlayer,
   createAudioPlayer,
   createAudioResource,
   StreamType,
 } from "@discordjs/voice";
-import { Playlist, Song } from "../playlist/playlist.ts";
-import { NotInGuildError } from "../errors/errors.ts";
-import * as music from "../playlist/playlist.ts";
-import { Readable } from "node:stream";
+import type { ChatInputCommandInteraction, GuildMember } from "discord.js";
+import { NotInGuildError } from "../errors/errors.js";
+import * as music from "../playlist/playlist.js";
+import { Playlist, type Song } from "../playlist/playlist.js";
 
 export interface Store {
   list: Playlist;
   player: AudioPlayer;
-  currentSong: Song | null;
+  currentSong: Song | undefined;
   listenerActive: boolean;
 }
 
@@ -25,7 +25,7 @@ export function getGuildState(guildId: string): Store {
     const newStore: Store = {
       list: new Playlist(),
       player: createAudioPlayer(),
-      currentSong: null,
+      currentSong: undefined,
       listenerActive: false,
     };
     newStore.player.on("error", console.error);
@@ -71,7 +71,9 @@ export async function userAndBotInSameVC(
 }
 
 export function playNextSong(store: Store) {
-  store.currentSong = store.list.songs[0];
+  const nextSong = store.list.songs[0];
+  if (!nextSong) throw "No hay canciones en la playlist";
+  store.currentSong = nextSong;
   const webStream = music.getAudioSource(store.currentSong.url);
   const nodeStream = Readable.from(webStream);
   const audioResource = createAudioResource(nodeStream, {

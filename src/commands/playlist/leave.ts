@@ -1,11 +1,11 @@
+import { getVoiceConnection } from "@discordjs/voice";
 import {
-  ChatInputCommandInteraction,
+  type ChatInputCommandInteraction,
   MessageFlags,
   SlashCommandBuilder,
 } from "discord.js";
-import { getVoiceConnection } from "@discordjs/voice";
-import { getStore, userAndBotInSameVC } from "../../utils/store.ts";
-import { UnImportantError } from "../../errors/errors.ts";
+import { UnImportantError } from "../../errors/errors.js";
+import { getStore, userAndBotInSameVC } from "../../utils/store.js";
 
 export default {
   data: new SlashCommandBuilder()

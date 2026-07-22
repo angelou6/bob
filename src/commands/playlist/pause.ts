@@ -1,7 +1,10 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
-import { getStore, userAndBotInSameVC } from "../../utils/store.ts";
 import { AudioPlayerStatus } from "@discordjs/voice";
-import { UnImportantError, UserNotInSameVCError } from "../../errors/errors.ts";
+import {
+  type ChatInputCommandInteraction,
+  SlashCommandBuilder,
+} from "discord.js";
+import { UnImportantError, UserNotInSameVCError } from "../../errors/errors.js";
+import { getStore, userAndBotInSameVC } from "../../utils/store.js";
 
 export default {
   data: new SlashCommandBuilder()

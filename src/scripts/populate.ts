@@ -1,9 +1,9 @@
-import { ApplicationCommand, REST, Routes } from "discord.js";
-import { getCommandsFiles } from "../utils/files.ts";
+import { type ApplicationCommand, REST, Routes } from "discord.js";
+import { getCommandsFiles } from "../utils/files.js";
 
-const TOKEN = Deno.env.get("DISCORD_TOKEN");
-const APP_ID = Deno.env.get("APP_ID");
-const GUILD_ID = Deno.env.get("GUILD_ID");
+const TOKEN = process.env.DISCORD_TOKEN;
+const APP_ID = process.env.APP_ID;
+const GUILD_ID = process.env.GUILD_ID;
 
 const target = process.argv[2];
 

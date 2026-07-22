@@ -1,7 +1,10 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 import { AudioPlayerStatus } from "@discordjs/voice";
-import { getStore, userAndBotInSameVC } from "../../utils/store.ts";
-import { UserNotInSameVCError } from "../../errors/errors.ts";
+import {
+  type ChatInputCommandInteraction,
+  SlashCommandBuilder,
+} from "discord.js";
+import { UserNotInSameVCError } from "../../errors/errors.js";
+import { getStore, userAndBotInSameVC } from "../../utils/store.js";
 
 export default {
   data: new SlashCommandBuilder()
@@ -11,7 +14,7 @@ export default {
       option
         .setName("id")
         .setDescription("ID de la canción a eliminar.")
-        .setRequired(true)
+        .setRequired(true),
     ),
   execute: async (interaction: ChatInputCommandInteraction) => {
     if (!(await userAndBotInSameVC(interaction))) {

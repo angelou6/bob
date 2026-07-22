@@ -1,11 +1,14 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 import {
   entersState,
   joinVoiceChannel,
   VoiceConnectionStatus,
 } from "@discordjs/voice";
-import { getBotVC, getStore, getUserVC } from "../../utils/store.ts";
-import { BotInVCError, UserNotInVCError } from "../../errors/errors.ts";
+import {
+  type ChatInputCommandInteraction,
+  SlashCommandBuilder,
+} from "discord.js";
+import { BotInVCError, UserNotInVCError } from "../../errors/errors.js";
+import { getBotVC, getStore, getUserVC } from "../../utils/store.js";
 
 export default {
   data: new SlashCommandBuilder()

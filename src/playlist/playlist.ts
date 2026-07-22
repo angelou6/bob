@@ -1,5 +1,6 @@
+import { spawn } from "node:child_process";
 import { Innertube, Log, UniversalCache } from "youtubei.js";
-import { urlToSongs } from "./urls.ts";
+import { urlToSongs } from "./urls.js";
 
 Log.setLevel(0);
 const yt = await Innertube.create({
@@ -31,7 +32,7 @@ export class Playlist {
   public removeFromSong(s: Song) {
     for (let i = 0; i < this.songs.length; i++) {
       const song = this.songs[i];
-      if (s == song) {
+      if (s === song) {
         this.remove(i);
         return;
       }
@@ -39,18 +40,19 @@ export class Playlist {
   }
 
   public semiShuffle() {
+    if (this.songs.length === 0) return;
     const tempArr = this.songs.slice(1);
     for (let i = 0, len = tempArr.length; i < len; i++) {
       const j = Math.floor(Math.random() * len);
-      [tempArr[i], tempArr[j]] = [tempArr[j], tempArr[i]];
+      [tempArr[i], tempArr[j]] = [tempArr[j]!, tempArr[i]!];
     }
-    this.songs = [this.songs[0], ...tempArr];
+    this.songs = [this.songs[0]!, ...tempArr];
   }
 
   public fullShuffle() {
     for (let i = 0, len = this.songs.length; i < len; i++) {
       const j = Math.floor(Math.random() * len);
-      [this.songs[i], this.songs[j]] = [this.songs[j], this.songs[i]];
+      [this.songs[i], this.songs[j]] = [this.songs[j]!, this.songs[i]!];
     }
   }
 
@@ -61,13 +63,13 @@ export class Playlist {
     if (
       this.songs[from] === undefined ||
       this.songs[to] === undefined ||
-      to == from
+      to === from
     ) {
       throw "Index de la canción es invalido";
     }
 
     const [element] = this.songs.splice(from, 1);
-    this.songs.splice(to, 0, element);
+    this.songs.splice(to, 0, element!);
   }
 
   public display(): string {
@@ -85,9 +87,10 @@ function parseUrlsFromInput(value: string): string[] {
     .filter(Boolean);
 }
 
-export function getAudioSource(url: string): ReadableStream<Uint8Array> {
-  const command = new Deno.Command("yt-dlp", {
-    args: [
+export function getAudioSource(url: string) {
+  const child = spawn(
+    "yt-dlp",
+    [
       "--no-playlist",
       "-f",
       "bestaudio[ext=webm]/bestaudio",
@@ -96,27 +99,19 @@ export function getAudioSource(url: string): ReadableStream<Uint8Array> {
       "--quiet",
       url,
     ],
-    stdout: "piped",
-    stderr: "inherit",
-  });
-
-  const process = command.spawn();
-  const stream = process.stdout.pipeThrough(
-    new TransformStream({
-      flush() {
-        process.status.catch(() => {});
-      },
-    }),
+    {
+      stdio: ["ignore", "pipe", "inherit"],
+    },
   );
-  return stream;
+
+  return child.stdout;
 }
 
 export async function search(query: string): Promise<Song> {
   const res = await yt.music.search(query, { type: "song" });
   const firstSong = res.songs?.contents?.[0];
-  if (!firstSong || !firstSong.title || !firstSong.id || !firstSong.duration) {
+  if (!firstSong?.title || !firstSong?.id || !firstSong?.duration)
     throw "No se pudo encontrar canción";
-  }
 
   return {
     title: firstSong.title,

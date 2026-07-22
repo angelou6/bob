@@ -1,12 +1,15 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
+import { AudioPlayerStatus } from "@discordjs/voice";
+import {
+  type ChatInputCommandInteraction,
+  SlashCommandBuilder,
+} from "discord.js";
+import { UnImportantError, UserNotInSameVCError } from "../../errors/errors.js";
 import {
   getStore,
   playNextSong,
-  Store,
+  type Store,
   userAndBotInSameVC,
-} from "../../utils/store.ts";
-import { AudioPlayerStatus } from "@discordjs/voice";
-import { UnImportantError, UserNotInSameVCError } from "../../errors/errors.ts";
+} from "../../utils/store.js";
 
 function setupPlayerListener(store: Store) {
   store.player.on("stateChange", (oldState, newState) => {
@@ -19,7 +22,7 @@ function setupPlayerListener(store: Store) {
         if (store.list.songs.length > 0) {
           playNextSong(store);
         } else {
-          store.currentSong = null;
+          store.currentSong = undefined;
         }
       }
     }

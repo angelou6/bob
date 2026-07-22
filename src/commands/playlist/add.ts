@@ -2,19 +2,20 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  CacheType,
-  ChatInputCommandInteraction,
+  type CacheType,
+  type ChatInputCommandInteraction,
   ComponentType,
   SlashCommandBuilder,
 } from "discord.js";
-import { getStore, userAndBotInSameVC } from "../../utils/store.ts";
-import * as music from "../../playlist/playlist.ts";
-import { UserNotInSameVCError } from "../../errors/errors.ts";
+import { UserNotInSameVCError } from "../../errors/errors.js";
+import * as music from "../../playlist/playlist.js";
+import { getStore, userAndBotInSameVC } from "../../utils/store.js";
 
 function formatBatchConfirmation(songs: music.Song[]): string {
-  const header = songs.length === 1
-    ? "Se eñadio la canción"
-    : `se añadieron ${songs.length} canciones`;
+  const header =
+    songs.length === 1
+      ? "Se eñadio la canción"
+      : `se añadieron ${songs.length} canciones`;
 
   return [
     header,
@@ -63,8 +64,8 @@ export default {
           option
             .setName("url")
             .setDescription("URLs a añadir, separadas por espacios.")
-            .setRequired(true)
-        )
+            .setRequired(true),
+        ),
     )
     .addSubcommand((sub) =>
       sub
@@ -74,8 +75,8 @@ export default {
           option
             .setName("query")
             .setDescription("Query de busqueda.")
-            .setRequired(true)
-        )
+            .setRequired(true),
+        ),
     ),
   execute: async (interaction: ChatInputCommandInteraction) => {
     if (!(await userAndBotInSameVC(interaction))) {
@@ -108,9 +109,10 @@ export default {
               store.list.removeFromSong(song);
             }
             await i.update({
-              content: songs.length === 1
-                ? "Se removió la cancion"
-                : `Se removieron ${songs.length} canciones`,
+              content:
+                songs.length === 1
+                  ? "Se removió la cancion"
+                  : `Se removieron ${songs.length} canciones`,
               components: [],
             });
           }

@@ -1,5 +1,8 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
-import { getStore } from "../../utils/store.ts";
+import {
+  type ChatInputCommandInteraction,
+  SlashCommandBuilder,
+} from "discord.js";
+import { getStore } from "../../utils/store.js";
 
 export default {
   data: new SlashCommandBuilder()
