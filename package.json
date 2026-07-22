@@ -1,35 +1,36 @@
 {
-	"name": "bob-nodejs",
-	"version": "1.0.0",
-	"description": "Bot de Discord personal para reproducir música ",
-	"main": "dist/main.js",
-	"type": "module",
-	"scripts": {
-		"bob": "tsc && node --env-file=.env dist/main.js",
-		"populate": "tsc && node --env-file=.env dist/scrips/populate.js",
-		"delete": "tsc && node --env-file=.env dist/scripts/delete.js",
-		"test": "node --import tsx --test"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/angelou6/bob.git"
-	},
-	"author": "angelo",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/angelou6/bob/issues"
-	},
-	"homepage": "https://github.com/angelou6/bob#readme",
-	"devDependencies": {
-		"@biomejs/biome": "2.5.5",
-		"@types/node": "^26.1.1",
-		"tsx": "^4.23.1",
-		"typescript": "^7.0.2"
-	},
-	"dependencies": {
-		"@discordjs/voice": "^0.19.2",
-		"cheerio": "^1.2.0",
-		"discord.js": "^14.27.0",
-		"youtubei.js": "^17.2.0"
-	}
+  "name": "bob",
+  "version": "1.0.0",
+  "description": "Bot de Discord personal para reproducir música ",
+  "main": "dist/main.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "bob": "node --env-file=.env dist/main.js",
+    "populate": "tsc && node --env-file=.env dist/scrips/populate.js",
+    "delete": "tsc && node --env-file=.env dist/scripts/delete.js",
+    "test": "node --import tsx --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/angelou6/bob.git"
+  },
+  "author": "angelo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/angelou6/bob/issues"
+  },
+  "homepage": "https://github.com/angelou6/bob#readme",
+  "devDependencies": {
+    "@biomejs/biome": "2.5.5",
+    "@types/node": "^26.1.1",
+    "tsx": "^4.23.1",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@discordjs/voice": "^0.19.2",
+    "cheerio": "^1.2.0",
+    "discord.js": "^14.27.0",
+    "youtubei.js": "^17.2.0"
+  }
 }
