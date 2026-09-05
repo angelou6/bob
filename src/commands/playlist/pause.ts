@@ -3,26 +3,33 @@ import {
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
-import { UnImportantError, UserNotInSameVCError } from "../../errors/errors.js";
 import { getStore, userAndBotInSameVC } from "../../utils/store.js";
+import {
+	EMPTY_PLAYLIST,
+	USER_VC_ERROR,
+	userDiscordError,
+} from "../../utils/user-error.js";
 
 export default {
 	data: new SlashCommandBuilder()
 		.setName("pause")
 		.setDescription("Detiene la reproducción."),
 	execute: async (interaction: ChatInputCommandInteraction) => {
-		if (!(await userAndBotInSameVC(interaction))) {
-			throw new UserNotInSameVCError();
+		const userInVC = await userAndBotInSameVC(interaction);
+		if (!userInVC) {
+			await userDiscordError(interaction, USER_VC_ERROR);
+			return;
 		}
 
 		const store = getStore(interaction);
 
 		if (store.list.songs.length === 0) {
-			throw "No hay canciones en la playlist";
+			await userDiscordError(interaction, EMPTY_PLAYLIST);
+			return;
 		}
 
 		if (store.player.state.status === AudioPlayerStatus.Paused) {
-			throw new UnImportantError("El audio ya está pausado.");
+			await userDiscordError(interaction, "El audio ya está pausado.");
 		} else {
 			store.player.pause();
 			await interaction.reply("Audio pausado.");

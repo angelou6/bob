@@ -3,8 +3,8 @@ import {
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
-import { UserNotInSameVCError } from "../../errors/errors.js";
 import { getStore, userAndBotInSameVC } from "../../utils/store.js";
+import { USER_VC_ERROR, userDiscordError } from "../../utils/user-error.js";
 
 export default {
 	data: new SlashCommandBuilder()
@@ -23,8 +23,10 @@ export default {
 				.setRequired(true),
 		),
 	execute: async (interaction: ChatInputCommandInteraction) => {
-		if (!(await userAndBotInSameVC(interaction))) {
-			throw new UserNotInSameVCError();
+		const userInVC = await userAndBotInSameVC(interaction);
+		if (!userInVC) {
+			await userDiscordError(interaction, USER_VC_ERROR);
+			return;
 		}
 
 		const store = getStore(interaction);

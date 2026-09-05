@@ -6,7 +6,6 @@ import {
 	StreamType,
 } from "@discordjs/voice";
 import type { ChatInputCommandInteraction, GuildMember } from "discord.js";
-import { NotInGuildError } from "../errors/errors.js";
 import * as music from "../playlist/playlist.js";
 import { Playlist, type Song } from "../playlist/playlist.js";
 
@@ -51,12 +50,12 @@ async function getVC(member: GuildMember) {
 }
 
 export async function getUserVC(interaction: ChatInputCommandInteraction) {
-	if (!interaction.inCachedGuild()) throw new NotInGuildError();
+	if (!interaction.inCachedGuild()) throw "Bot no esta en la guild.";
 	return await getVC(interaction.member);
 }
 
 export async function getBotVC(interaction: ChatInputCommandInteraction) {
-	if (!interaction.inCachedGuild()) throw new NotInGuildError();
+	if (!interaction.inCachedGuild()) throw "Bot no esta en la guild.";
 	const member = interaction.guild.members.me;
 	if (member === null) throw "BotMember es Null";
 	return await getVC(member);

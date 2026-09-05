@@ -2,7 +2,7 @@ import assert from "node:assert";
 import { test } from "node:test";
 import { search, songsfromUrl } from "../src/playlist/playlist.js";
 
-test("url", async () => {
+test("youtube url", async () => {
 	const data = await songsfromUrl(
 		"https://www.youtube.com/watch?v=3h7vqzFyKyo",
 	);
@@ -15,7 +15,7 @@ test("url", async () => {
 	]);
 });
 
-test("search", async () => {
+test("youtube search", async () => {
 	const data = await search("Coffee (Radio Edit) Supersister");
 
 	assert.deepStrictEqual(data, {
@@ -25,7 +25,7 @@ test("search", async () => {
 	});
 });
 
-test("playlist", async () => {
+test("youtube playlist", async () => {
 	const data = await songsfromUrl(
 		"https://music.youtube.com/playlist?list=OLAK5uy_mW0lhv4m1_T0MxfIY5w_DHznHkpawAboY",
 	);
@@ -39,7 +39,7 @@ test("playlist", async () => {
 	]);
 });
 
-test("short url", async () => {
+test("short youtube url", async () => {
 	const data = await songsfromUrl(
 		"https://youtu.be/3h7vqzFyKyo?si=_8tNdXzNTabSMuqs",
 	);

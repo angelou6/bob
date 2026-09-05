@@ -3,24 +3,22 @@ import {
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
-import { UserNotInSameVCError } from "../../errors/errors.js";
 import { getStore, userAndBotInSameVC } from "../../utils/store.js";
+import { USER_VC_ERROR, userDiscordError } from "../../utils/user-error.js";
 
 export default {
 	data: new SlashCommandBuilder()
 		.setName("shuffle")
 		.setDescription("Re ordenar aleatoriamente la lista de reproducción."),
 	async execute(interaction: ChatInputCommandInteraction) {
-		if (!(await userAndBotInSameVC(interaction))) {
-			throw new UserNotInSameVCError();
-		}
-
-		const store = getStore(interaction);
-		if (store.player.state.status === AudioPlayerStatus.Playing) {
-			store.list.semiShuffle();
+		if (await userAndBotInSameVC(interaction)) {
+			const store = getStore(interaction);
+			store.list.shuffle(
+				store.player.state.status === AudioPlayerStatus.Playing,
+			);
+			await interaction.reply(store.list.display());
 		} else {
-			store.list.fullShuffle();
+			await userDiscordError(interaction, USER_VC_ERROR);
 		}
-		await interaction.reply(store.list.display());
 	},
 };

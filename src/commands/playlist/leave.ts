@@ -4,8 +4,8 @@ import {
 	MessageFlags,
 	SlashCommandBuilder,
 } from "discord.js";
-import { UnImportantError } from "../../errors/errors.js";
 import { getStore, userAndBotInSameVC } from "../../utils/store.js";
+import { userDiscordError } from "../../utils/user-error.js";
 
 export default {
 	data: new SlashCommandBuilder()
@@ -13,15 +13,21 @@ export default {
 		.setDescription("Hace que el bot se salga del vc"),
 	async execute(interaction: ChatInputCommandInteraction) {
 		if (!interaction.inCachedGuild()) {
-			throw new UnImportantError("Este comando solo puede correr en un Guild");
+			userDiscordError(
+				interaction,
+				"Este comando solo puede correr en un Guild",
+			);
+			return;
 		}
 
 		const store = getStore(interaction);
 
 		const connection = getVoiceConnection(interaction.guildId);
 		if (connection) {
-			if (!(await userAndBotInSameVC(interaction))) {
-				throw new UnImportantError("Necesitas estar en el mismo VC que yo.");
+			const sameVC = await userAndBotInSameVC(interaction);
+			if (!sameVC) {
+				userDiscordError(interaction, "Necesitas estar en el mismo VC que yo.");
+				return;
 			}
 
 			store.player.removeAllListeners("stateChange");
@@ -32,7 +38,7 @@ export default {
 				flags: MessageFlags.Ephemeral,
 			});
 		} else {
-			throw new UnImportantError("No estoy en un canal de voz.");
+			userDiscordError(interaction, "No estoy en un canal de voz.");
 		}
 	},
 };

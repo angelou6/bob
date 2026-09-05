@@ -6,9 +6,7 @@ import {
 	Events,
 	GatewayIntentBits,
 	type Interaction,
-	MessageFlags,
 } from "discord.js";
-import { UnImportantError } from "./errors/errors.js";
 import { getCommandsFiles } from "./utils/files.js";
 
 const client = new Client({
@@ -41,25 +39,7 @@ client.on(
 		try {
 			await command.execute(interaction);
 		} catch (error) {
-			if (!(error instanceof UnImportantError)) console.error(error);
-
-			try {
-				if (interaction.replied) {
-					await interaction.followUp({
-						content: `❌ ${error}`,
-						flags: MessageFlags.Ephemeral,
-					});
-				} else if (interaction.deferred) {
-					await interaction.editReply({ content: `❌ ${error}` });
-				} else {
-					await interaction.reply({
-						content: `❌ ${error}`,
-						flags: MessageFlags.Ephemeral,
-					});
-				}
-			} catch (replyError) {
-				console.error("No se pudo responder a la interacción:", replyError);
-			}
+			console.error(error);
 		}
 	},
 );

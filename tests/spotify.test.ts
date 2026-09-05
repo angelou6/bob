@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { songsfromUrl } from "../src/playlist/playlist.js";
 import { getSpotifyData } from "../src/playlist/spotify.js";
 
-test("url", async () => {
+test("spotify url", async () => {
 	const data = await getSpotifyData(
 		"https://open.spotify.com/intl-es/track/5RJPyaKUYv1t45BSdgSKqu",
 	);
@@ -14,7 +14,7 @@ test("url", async () => {
 	});
 });
 
-test("url to youtube", async () => {
+test("spotify url to youtube", async () => {
 	const data = await songsfromUrl(
 		"https://open.spotify.com/intl-es/track/5RJPyaKUYv1t45BSdgSKqu",
 	);
@@ -28,16 +28,16 @@ test("url to youtube", async () => {
 	]);
 });
 
-test("playlist url", async () => {
+test("spotify playlist url", async () => {
 	const data = await songsfromUrl(
-		"https://open.spotify.com/intl-es/album/49pb86COfdPTLKxLR0LWyX",
+		"https://open.spotify.com/intl-es/album/0M8Foi8rawsI1YHru9bG9B",
 	);
 
 	assert.deepStrictEqual(data, [
 		{
-			title: "Colorful Array",
-			url: "https://www.youtube.com/watch?v=jeVbKwPtL_0",
-			duration: "4:33",
+			title: "Stupid Heart",
+			url: "https://www.youtube.com/watch?v=AwLg3sQOqys",
+			duration: "3:10",
 		},
 	]);
 });

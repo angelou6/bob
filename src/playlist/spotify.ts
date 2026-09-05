@@ -11,8 +11,8 @@ export async function getSpotifyData(url: string): Promise<spotifyData> {
 	const $ = cheerio.load(html);
 
 	return {
-		title: $("h1.KL2Hl01OoEqXbgKK").text(),
-		author: $(".R2qcMPMSVf4gnglJ a").text(),
+		title: $("h1.mbNIy3B9g1lTNZxilD3l").text(),
+		author: $(".MhXYXgEVFIkj5DMBBtNa a").text(),
 	};
 }
 

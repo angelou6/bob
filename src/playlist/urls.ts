@@ -96,6 +96,8 @@ export async function urlToSongs(url: string, yt: Innertube): Promise<Song[]> {
 					!videoInfo.basic_info.id ||
 					!videoInfo.basic_info.duration
 				) {
+					console.error(`Error encontrando canción con url: ${url}`);
+					console.error(videoInfo.basic_info);
 					throw "No se pudo encontrar canción";
 				}
 

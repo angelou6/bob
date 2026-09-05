@@ -7,8 +7,12 @@ import {
 	type ChatInputCommandInteraction,
 	SlashCommandBuilder,
 } from "discord.js";
-import { BotInVCError, UserNotInVCError } from "../../errors/errors.js";
 import { getBotVC, getStore, getUserVC } from "../../utils/store.js";
+import {
+	BOT_VC_ERROR,
+	USER_VC_ERROR,
+	userDiscordError,
+} from "../../utils/user-error.js";
 
 export default {
 	data: new SlashCommandBuilder()
@@ -17,10 +21,16 @@ export default {
 	async execute(interaction: ChatInputCommandInteraction) {
 		const store = getStore(interaction);
 
-		if (await getBotVC(interaction)) throw new BotInVCError();
+		if (await getBotVC(interaction)) {
+			await userDiscordError(interaction, BOT_VC_ERROR);
+			return;
+		}
 
 		const userVC = await getUserVC(interaction);
-		if (!userVC) throw new UserNotInVCError();
+		if (!userVC) {
+			await userDiscordError(interaction, USER_VC_ERROR);
+			return;
+		}
 
 		const connection = joinVoiceChannel({
 			channelId: userVC.id,

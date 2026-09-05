@@ -15,7 +15,7 @@ export interface Song {
 	duration: string;
 }
 
-function swap<T>(arr: T[], i: number, j: number): void {
+function swap(arr: Song[], i: number, j: number): void {
 	const a = arr[i];
 	const b = arr[j];
 	if (a === undefined || b === undefined) return;
@@ -47,16 +47,10 @@ export class Playlist {
 		}
 	}
 
-	public semiShuffle(): void {
-		for (let i = this.songs.length - 1; i > 1; i--) {
-			const j = 1 + Math.floor(Math.random() * i);
-			swap(this.songs, i, j);
-		}
-	}
-
-	public fullShuffle(): void {
+	public shuffle(skip_first: boolean = false) {
 		for (let i = this.songs.length - 1; i > 0; i--) {
-			const j = Math.floor(Math.random() * (i + 1));
+			let j = Math.floor(Math.random() * (i + 1));
+			if (skip_first) j += 1;
 			swap(this.songs, i, j);
 		}
 	}
@@ -116,8 +110,11 @@ export function getAudioSource(url: string) {
 export async function search(query: string): Promise<Song> {
 	const res = await yt.music.search(query, { type: "song" });
 	const firstSong = res.songs?.contents?.[0];
-	if (!firstSong?.title || !firstSong?.id || !firstSong?.duration)
-		throw "No se pudo encontrar canción";
+	if (!firstSong?.title || !firstSong?.id || !firstSong?.duration) {
+		console.error(`Error encontrando canción: ${query}`);
+		console.error(firstSong);
+		throw "No se pudo encontrar canción.";
+	}
 
 	return {
 		title: firstSong.title,
