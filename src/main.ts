@@ -29,12 +29,7 @@ client.on(
 		if (!interaction.isChatInputCommand()) return;
 
 		const command = interaction.client.commands.get(interaction.commandName);
-		if (!command) {
-			console.error(
-				`No hay comando coincidente para ${interaction.commandName} fué encontrado.`,
-			);
-			return;
-		}
+		if (command === undefined) return;
 
 		try {
 			await command.execute(interaction);

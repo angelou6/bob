@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "bob": "node --env-file=.env dist/main.js",
+    "bob": "npm run build && node --env-file=.env dist/main.js",
+    "justbob": "node --env-file=.env dist/main.js",
     "populate": "tsc && node --env-file=.env dist/scrips/populate.js",
     "delete": "tsc && node --env-file=.env dist/scripts/delete.js",
     "test": "node --import tsx --test"
