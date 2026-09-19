@@ -1,0 +1,21 @@
+[project]
+name = "bob"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Angelo", email = "68724210+angelou6@users.noreply.github.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "py-cord[voice]>=2.8.1",
+    "selectolax>=0.4.12",
+    "yt-dlp>=2026.8.19",
+]
+
+[project.scripts]
+bob = "bob.bob:main"
+
+[build-system]
+requires = ["uv_build>=0.12.8,<0.13.0"]
+build-backend = "uv_build"
