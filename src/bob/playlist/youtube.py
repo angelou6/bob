@@ -41,8 +41,8 @@ def is_playlist(url: str) -> bool:
 
 def get_playlist(url: str) -> list[Song]:
     songs = []
+    # TODO: This is slow as balls, figure out how to do faster.
     info = ydl.extract_info(url, download=False)
-    # TODO: This is slow as balls, figure out a way to do faster.
     if "entries" in info:
         for video in info["entries"]:
             if video is None:

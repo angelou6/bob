@@ -99,8 +99,8 @@ class Music(commands.Cog):
 
     # TODO FIX:
     # For some reason the bot takes a lot of time actually entering the VC
-    # However, in the Discord UI it joins instantly
-    # If the user does anything voice related before is propperly connected, it silently fails.
+    # however, in the Discord UI it joins instantly
+    # If the user does anything voice related before it's propperly connected, it silently fails.
     # Yippie...
     @discord.slash_command(description="Hace que el bot se una al VC", guild_only=True)
     async def join(self, ctx: discord.ApplicationContext):
