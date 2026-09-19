@@ -2,17 +2,11 @@
 
 He bobin
 
-To install dependencies:
-
-```bash
-npm install
-```
-
 To run:
 
-```bash
-npm run bob
+```sh
+uv run --env-file .env bob
 ```
 
-This project was created using `npm init` in node v22.22.2.
-[Node](https://nodejs.org) is a JavaScript runtime.
+This project was created using `uv init`.
+[Uv](https://docs.astral.sh/uv/) is not a JavaScript runtime.
