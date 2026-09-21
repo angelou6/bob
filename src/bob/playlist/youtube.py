@@ -1,7 +1,6 @@
 import re
-from typing import Any, cast
 
-from yt_dlp import YoutubeDL
+from ytmusicapi import YTMusic
 
 from bob.errors import URLError
 from bob.playlist.song import Song
@@ -10,23 +9,14 @@ YT_REGEX = re.compile(
     r"^(https?://)?(www\.|music\.)?(youtube\.com/(watch\?v=[\w-]{11}|shorts/[\w-]{11}|playlist\?list=[\w-]+)|youtu\.be/[\w-]{11})"
 )
 
-ydl_opts = {
-    "format": "bestaudio/best",
-    "skip_download": True,
-    "quiet": True,
-    "no_warnings": True,
-    "ignore_errors": True,
-}
+YT_ID_REGEX = re.compile(
+    r'(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})'
+)
 
-search_opts = {
-    **ydl_opts,
-    "playlist_items": "1",
-}
-
-ydl = YoutubeDL(cast(Any, ydl_opts))
+ytmusic = YTMusic()
 
 
-def __format_duration(duration: int) -> str:
+def format_duration(duration: int) -> str:
     minutes, seconds = divmod(duration, 60)
     return f"{minutes}:{seconds:02d}"
 
@@ -39,55 +29,49 @@ def is_playlist(url: str) -> bool:
     return "/playlist?" in url
 
 
+def get_video_id(url: str) -> str | None:
+    id = re.search(YT_ID_REGEX, url)
+    return id.group(1) if id is not None else None
+
+
+def get_playlist_url(url: str) -> str | None:
+    id = re.search("[&?]list=([^&]+)", url)
+    return id.group(1) if id is not None else None
+
+
 def get_playlist(url: str) -> list[Song]:
     songs = []
-    # TODO: This is slow as balls, figure out how to do faster.
-    info = ydl.extract_info(url, download=False)
-    if "entries" in info:
-        for video in info["entries"]:
-            if video is None:
-                continue
-            title = video.get("title")
-            duration = video.get("duration")
-            video_id = video.get("id")
-            source_url = video.get("url")
-            video_url = (
-                f"https://www.youtube.com/watch?v={video_id}" if video_id else None
-            )
+    id = get_playlist_url(url)
+    if id is None:
+        raise URLError("Could not get playlist")
 
-            if title and video_url and duration and source_url:
-                songs.append(
-                    Song(title, video_url, source_url, __format_duration(duration))
-                )
+    playlist = ytmusic.get_playlist(id)
+    for track in playlist["tracks"]:
+        url = f"https://www.youtube.com/watch?v={track['videoId']}"
+        songs.append(Song(track["title"], url, track["duration"]))
     return songs
 
 
 def get_data(url: str) -> Song:
-    info = ydl.extract_info(url, download=False)
-    title = info.get("title")
-    duration = info.get("duration")
-    video_id = info.get("id")
-    source_url = info.get("url")
-    video_url = f"https://www.youtube.com/watch?v={video_id}" if video_id else None
+    id = get_video_id(url)
+    if id is None:
+        raise URLError("Could not get video")
 
-    if title and video_url and duration and source_url:
-        return Song(title, video_url, source_url, __format_duration(duration))
-    raise URLError("Invalid YouTube URL")
+    song = ytmusic.get_song(id)
+    if not song:
+        raise URLError("Could not get video")
+
+    song = song["videoDetails"]
+    url = f"https://www.youtube.com/watch?v={song['videoId']}"
+    return Song(song["title"], url, format_duration(int(song["lengthSeconds"])))
 
 
 def search(query: str) -> Song:
-    search_url = f"https://music.youtube.com/search?q={query}"
-    with YoutubeDL(cast(Any, search_opts)) as sydl:
-        info = sydl.extract_info(search_url, download=False)
+    song = ytmusic.search(query, filter="songs", limit=1)
 
-        # It works and I don't want to make the code ugly just to make pyright stop complaining
-        # I love pyright
-        video = info["entries"][0]  # type: ignore
-        title = video.get("title")
-        source_url = video.get("url")
-        video_url = video.get("webpage_url")
-        duration = video.get("duration")
+    if not song:
+        raise URLError(f"No song found. Search query: {query}")
 
-        if title and video_url and duration and source_url:
-            return Song(title, video_url, source_url, __format_duration(duration))
-    raise URLError(f"Error during search. Search query: {query}")
+    song = song[0]
+    url = f"https://www.youtube.com/watch?v={song['videoId']}"
+    return Song(song["title"], url, song["duration"])
