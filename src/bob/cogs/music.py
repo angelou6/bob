@@ -306,6 +306,15 @@ class Music(commands.Cog):
         p = store.get_playlist(ctx)
         await ctx.respond(p.display())
 
+    @discord.slash_command(description="Muestra la cancion que se esta reproduciendo")
+    async def playing(self, ctx: discord.ApplicationContext):
+        p = store.get_playlist(ctx)
+        await ctx.respond(
+            p.current_song.url
+            if p.current_song is not None
+            else "No hay ninguna canción en reproducción."
+        )
+
 
 def setup(bot):
     bot.add_cog(Music(bot))
