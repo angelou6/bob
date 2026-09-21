@@ -1,3 +1,6 @@
+import subprocess
+from io import BufferedIOBase
+from typing import cast
 from venv import logger
 
 import discord
@@ -19,20 +22,47 @@ from bob.playlist import platform, song, youtube
 from bob.playlist.playlist import Playlist
 
 
+class YTDLPSource(discord.FFmpegPCMAudio):
+    def __init__(self, url: str):
+        self.ytdlp = subprocess.Popen(
+            [
+                "yt-dlp",
+                "-f",
+                "bestaudio",
+                "--no-playlist",
+                "-q",
+                "-o",
+                "-",
+                url,
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+        )
+
+        stdout = self.ytdlp.stdout
+        assert stdout is not None
+
+        super().__init__(
+            cast(BufferedIOBase, stdout),
+            pipe=True,
+            options="-vn",
+        )
+
+    def cleanup(self):
+        super().cleanup()
+        if self.ytdlp.poll() is None:
+            self.ytdlp.kill()
+        if self.ytdlp.stdout is not None:
+            self.ytdlp.stdout.close()
+
+
 def play_song(vc: VoiceClient, song: song.Song, callback):
     def after(error):
         if error:
             print(f"Player error: {error}")
         callback()
 
-    vc.play(
-        discord.FFmpegPCMAudio(
-            song.source_url,
-            before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-            options="-vn",
-        ),
-        after=after,
-    )
+    vc.play(YTDLPSource(song.url), after=after)
 
 
 def play_next(vc: VoiceClient, p: Playlist):

@@ -23,11 +23,9 @@ class URLData:
 class Song:
     title: str
     url: str
-    source_url: str
     duration: str
 
-    def __init__(self, title: str, url: str, src_url: str, duration: str) -> None:
+    def __init__(self, title: str, url: str, duration: str) -> None:
         self.title = title
         self.url = url
-        self.source_url = src_url
         self.duration = duration

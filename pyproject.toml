@@ -11,6 +11,7 @@ dependencies = [
     "py-cord[voice]>=2.8.1",
     "selectolax>=0.4.12",
     "yt-dlp>=2026.8.19",
+    "ytmusicapi>=1.12.3",
 ]
 
 [project.scripts]
