@@ -144,6 +144,8 @@ class Music(commands.Cog):
             await user_error(ctx, BOT_VC_ERROR)
         else:
             await channel.connect()
+            if ctx.guild:
+                await ctx.guild.change_voice_state(channel=channel, self_deaf=True)  # type: ignore
             await ctx.respond(f"Conectado en el canal {channel.mention}")
 
     @discord.slash_command(description="Hace que el bot salga del VC", guild_only=True)
