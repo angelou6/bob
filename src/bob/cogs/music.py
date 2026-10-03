@@ -14,7 +14,6 @@ from bob.errors import (
     BOT_VC_ERROR,
     EMPTY_PLAYLIST,
     SAME_VC,
-    USER_VC,
     URLError,
     user_error,
 )
@@ -75,8 +74,7 @@ def play_next(vc: VoiceClient, p: Playlist):
 
 async def get_author_voice(ctx: discord.ApplicationContext):
     if not isinstance(ctx.author, discord.Member) or not ctx.author.voice:
-        await user_error(ctx, USER_VC)
-        return
+        return None
 
     return ctx.author.voice.channel
 
@@ -84,7 +82,6 @@ async def get_author_voice(ctx: discord.ApplicationContext):
 async def in_same_vc(ctx) -> bool:
     channel = await get_author_voice(ctx)
     if channel is None:
-        await user_error(ctx, USER_VC)
         return False
 
     return ctx.voice_client.channel == channel
@@ -138,7 +135,7 @@ class Music(commands.Cog):
 
         channel = await get_author_voice(ctx)
         if channel is None:
-            return await user_error(ctx, USER_VC)
+            return
 
         if ctx.voice_client:
             await user_error(ctx, BOT_VC_ERROR)
@@ -203,7 +200,7 @@ class Music(commands.Cog):
         except URLError as e:
             await ctx.respond(e.message)
 
-    @discord.slash_command(description="Inicia la reproducción")
+    @discord.slash_command(name="play_pause", description="Inicia o pausa la reproducción")
     async def play(self, ctx: discord.ApplicationContext):
         if not await in_same_vc(ctx):
             return await user_error(ctx, SAME_VC)
@@ -217,28 +214,13 @@ class Music(commands.Cog):
             return await user_error(ctx, "No estoy en un VC")
 
         if vc.is_playing():
-            return await user_error(ctx, "El audio ya se está reproduciendo")
+            vc.pause()
         elif vc.is_paused():
             vc.resume()
         else:
             p.current_song = p.songs[0]
             play_song(vc, p.current_song, lambda: play_next(vc, p))
         await ctx.respond("Reproduciondo audio.", ephemeral=True)
-
-    @discord.slash_command(description="Detiene la reproducción.")
-    async def pause(self, ctx: discord.ApplicationContext):
-        if not await in_same_vc(ctx):
-            return await user_error(ctx, SAME_VC)
-
-        vc = ctx.voice_client
-        if not vc:
-            return await user_error(ctx, "No estoy en un VC")
-
-        if vc.is_paused():
-            await user_error(ctx, "El audio ya está pausado.")
-        else:
-            vc.pause()
-            await ctx.respond("Audio pausado.", ephemeral=True)
 
     @discord.slash_command(
         description="Re ordenar aleatoriamente la lista de reproducción."
