@@ -12,7 +12,7 @@ class Utility(commands.Cog):
 
     @discord.slash_command(description="Obtener el código del bot")
     async def source(self, ctx):
-        await ctx.respond("https://github.com/angelou6/bob")
+        await ctx.respond("https://codeberg.org/jaroflemonade/bob")
 
 
 def setup(bot):
