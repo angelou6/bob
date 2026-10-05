@@ -1,10 +1,10 @@
 [project]
 name = "bob"
 version = "0.1.0"
-description = "Add your description here"
+description = "Discord bot that plays music"
 readme = "README.md"
 authors = [
-    { name = "Angelo", email = "68724210+angelou6@users.noreply.github.com" }
+    { name = "jaroflemonade", email = "jaroflemonade@noreply.codeberg.org" }
 ]
 requires-python = ">=3.13"
 dependencies = [
